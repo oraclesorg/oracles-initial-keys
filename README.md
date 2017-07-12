@@ -15,7 +15,7 @@ Install [nodejs](https://nodejs.org/en/download/package-manager/)
 Expected result:
 
 ```
-Initial key generated to ./initialKeys/489d0379c2cc40bffd48a9c99e5f65fd7ddb0ed5.json
+Initial key generated to ./initialKeysDemo/489d0379c2cc40bffd48a9c99e5f65fd7ddb0ed5.json
 Password for initial key: goW2klc1
 0x489d0379c2cc40bffd48a9c99e5f65fd7ddb0ed5
 Wait tx to add initial key to be mined...
