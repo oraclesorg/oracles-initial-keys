@@ -1,4 +1,4 @@
-# Oracles PoA initla keys generation scripts
+# Oracles PoA initial keys generation script
 
 ## Install node.js
 Install [nodejs](https://nodejs.org/en/download/package-manager/)
