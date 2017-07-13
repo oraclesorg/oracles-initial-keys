@@ -5,7 +5,8 @@
   "devDependencies": {
     "web3": "^0.18.2",
     "keythereum": "^0.5.2",
-    "toml": "^2.3.2"
+    "toml": "^2.3.2",
+    "password-generator":"^2.1.0"
   },
   "repository": {
     "type": "git",
@@ -17,5 +18,8 @@
   "bugs": {
     "url": "/issues"
   },
-  "homepage": "#README"
+  "homepage": "#README",
+  "dependencies": {
+    "password-generator": "^2.1.0"
+  }
 }

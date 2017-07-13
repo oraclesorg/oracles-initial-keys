@@ -3,14 +3,15 @@
 ## Install node.js
 Install [nodejs](https://nodejs.org/en/download/package-manager/)
 
-## Generation of new initial key 
-1) `node ./generateInitialKey.js`
+## Generation of new initial keys
 
-2) Send 2 transactions in Parity `http://$BOOTNODE_IP:8180/` with contract owner
+- Install required packages `npm install` 
+- `node ./generateInitialKey.js`
+-  Send 2 transactions in Parity `http://$BOOTNODE_IP:8180/` with contract owner
 
-  а) addition of initial key to Oracles contract
+  (i) addition of initial key to Oracles contract
   
-  б) transfer of 0.1Eth to added initial key
+  (ii) transfer of 0.1Eth to added initial key
 
 Expected result:
 

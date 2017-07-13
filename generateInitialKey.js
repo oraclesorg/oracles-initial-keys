@@ -1,6 +1,7 @@
 var fs = require('fs');
 var keythereum = require("keythereum");
 var Web3 = require('web3');
+var generatePassword = require('password-generator');
 
 generateAddress(function(keyObject, password) {
 	var filename = "./initialKeysDemo/" + keyObject.address + ".json";
@@ -56,7 +57,7 @@ function generateAddress(cb) {
   // asynchronous
   keythereum.create(params, function (dk) {
     var options = {};
-    var password = generatePassword();
+    var password = generatePassword(20);
     keythereum.dump(password, dk.privateKey, dk.salt, dk.iv, options, function (keyObject) {
       //keythereum.exportToFile(keyObject);
       cb(keyObject, password);
@@ -159,16 +160,6 @@ String.prototype.hexEncode = function(){
 function SHA3Encrypt(web3, str, cb) {
   var strEncode = web3.sha3(str);
   cb(strEncode, null);
-}
-
-function generatePassword() {
-    var length = 8,
-        charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789",
-        retVal = "";
-    for (var i = 0, n = charset.length; i < length; ++i) {
-        retVal += charset.charAt(Math.floor(Math.random() * n));
-    }
-    return retVal;
 }
 
 function addInitialKeyTX(web3, contract, _addr, cb) {
