@@ -5,7 +5,8 @@ Install [nodejs](https://nodejs.org/en/download/package-manager/)
 
 ## Generation of new initial keys
 
-- Install required packages `npm install` 
+- Install required packages `npm install`
+- If run on your local machine, edit `config.json` and set `Ethereum.live.rpc` property to `"http://$BOOTNODE_IP:8540"`. If run from bootnode itself, skip this step.
 - `node ./generateInitialKey.js`
 -  Send 2 transactions in Parity `http://$BOOTNODE_IP:8180/` with contract owner
 
