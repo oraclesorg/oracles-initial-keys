@@ -12,7 +12,7 @@ function generateAddress(cb) {
 
   	keythereum.create(params, function (dk) {
 	    var options = {};
-	    var password = generatePassword(20);
+	    var password = generatePassword(20, false);
 	    keythereum.dump(password, dk.privateKey, dk.salt, dk.iv, options, function (keyObject) {
 	    	//keythereum.exportToFile(keyObject);
 	      	cb(keyObject, password);
