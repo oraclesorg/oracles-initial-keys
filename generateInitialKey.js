@@ -6,26 +6,18 @@ var generatePassword = require('password-generator');
 generateAddress(generateAddressCallback);
 
 function generateAddress(cb) {
-  var params = { keyBytes: 32, ivBytes: 16 };
+	var params = { keyBytes: 32, ivBytes: 16 };
 
-  // synchronous
-  var dk = keythereum.create(params);
-  // dk:
-  /*{
-      privateKey: <Buffer ...>,
-      iv: <Buffer ...>,
-      salt: <Buffer ...>
-  }*/
+  	var dk = keythereum.create(params);
 
-  // asynchronous
-  keythereum.create(params, function (dk) {
-    var options = {};
-    var password = generatePassword(20);
-    keythereum.dump(password, dk.privateKey, dk.salt, dk.iv, options, function (keyObject) {
-      //keythereum.exportToFile(keyObject);
-      cb(keyObject, password);
-    });
-  });
+  	keythereum.create(params, function (dk) {
+	    var options = {};
+	    var password = generatePassword(20);
+	    keythereum.dump(password, dk.privateKey, dk.salt, dk.iv, options, function (keyObject) {
+	    	//keythereum.exportToFile(keyObject);
+	      	cb(keyObject, password);
+	    });
+  	});
 }
 
 function generateAddressCallback(keyObject, password) {
