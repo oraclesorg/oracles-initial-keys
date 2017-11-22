@@ -18,7 +18,7 @@ Expected result:
 
 ```
 Initial key 0x87955e8a4c1887cbfcc79950620162eec89ac87b is generated to ./initialKeysDemo/87955e8a4c1887cbfcc79950620162eec89ac87b.json
-Password for initial key: zulujeziwivaxuximisu
+Password for initial key: jJ4NqPeUpxE3kIhlBjq9
 Estimated gas to add initial key: 50346
 Wait tx 0xbc2c717245950b4492884b1525a14968acfe73d426111d1ed8c30a64a0f7dfe4 to add initial key to be mined...
 Initial key 0x87955e8a4c1887cbfcc79950620162eec89ac87b is added to contract
