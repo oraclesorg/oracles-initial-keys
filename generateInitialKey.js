@@ -93,7 +93,7 @@ function getTxCallBack(web3, txHash, cb) {
   	});
 };
 
-async function addInitialKeyTX(web3, contract, initialKey, cb) {
+function addInitialKeyTX(web3, contract, initialKey, cb) {
 	contract.methods.addInitialKey(initialKey).estimateGas()
 	.then(function(estimatedGas) {
     	console.log("Estimated gas to add initial key:", estimatedGas)
