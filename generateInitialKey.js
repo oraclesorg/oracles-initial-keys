@@ -3,44 +3,7 @@ var keythereum = require("keythereum");
 var Web3 = require('web3');
 var generatePassword = require('password-generator');
 
-generateAddress(function(keyObject, password) {
-	var filename = "./initialKeysDemo/" + keyObject.address + ".json";
-	var content = JSON.stringify(keyObject);
-	fs.writeFile(filename, content, function (err) {
-	  if (err) return console.log(err);
-	  console.log('Initial key generated to ' + filename);
-	  console.log('Password for initial key: ' + password);
-	  addInitialKey("0x" + keyObject.address, function(web3) {
-	  	sendEtherToInitialKeyTX(web3, "0x" + keyObject.address, function(err, txHash) {
-	  		if (err) {
-	  			console.log("Something went wrong with sending Eth to initial key");
-	  			console.log(err.message);
-	  			return;
-	  		}
-
-	  		console.log("Wait tx to send Eth to initial key to be mined...");
-			getTxCallBack(web3, txHash, function() {
-				console.log("0.1 Eth sent to initial key");
-			});
-	  	});
-	  });
-	});
-});
-
-function getTxCallBack(web3, txHash, cb) {
-	web3.eth.getTransaction(txHash, function(err, txDetails) {
-  		if (err) {
-  			console.log(err);
-  		}
-  		if (!txDetails.blockNumber) {
-  			setTimeout(function() {
-				getTxCallBack(web3, txHash, cb);
-			}, 2000)
-  		} else {
-  			cb();
-  		}
-  	});
-};
+generateAddress(generateAddressCallback);
 
 function generateAddress(cb) {
   var params = { keyBytes: 32, ivBytes: 16 };
@@ -65,21 +28,24 @@ function generateAddress(cb) {
   });
 }
 
-function addInitialKey(_addr, cb) {
-	console.log(_addr);
-	attachToContract(function(err, contract, web3) {
-		addInitialKeyTX(web3, contract, _addr, function(err, txHash) {
-			if (err) {
-				console.log("error: " + err);
-				return;
-			}
-			console.log("Wait tx to add initial key to be mined...");
-			getTxCallBack(web3, txHash, function() {
-				console.log("Initial key " + _addr + " added to contract");
-				cb(web3);
-			});
-		});
+function generateAddressCallback(keyObject, password) {
+	var initialKey = "0x" + keyObject.address
+	var filename = "./initialKeysDemo/" + keyObject.address + ".json";
+	var content = JSON.stringify(keyObject);
+	fs.writeFileSync(filename, content)
 
+	console.log("Initial key " + initialKey + " is generated to " + filename);
+	console.log("Password for initial key:", password);
+	attachToContract(initialKey, addInitialKey);
+}
+
+function attachToContract(initialKey, cb) {
+	configureWeb3(function(web3, config, defaultAccount) {
+		var contractABI = config.Ethereum.contracts.Oracles.abi;
+		var contractAddress = config.Ethereum[config.environment].contractAddress;
+		var contractInstance = new web3.eth.Contract(contractABI, contractAddress);
+		
+		cb(contractInstance, web3, initialKey);
 	});
 }
 
@@ -91,109 +57,83 @@ function getConfig() {
 function configureWeb3(cb) {
 	var config = getConfig();
 	var web3;
-	if (typeof web3 !== 'undefined') {
-	  web3 = new Web3(web3.currentProvider);
-	} else {
-	  web3 = new Web3(new Web3.providers.HttpProvider(config.Ethereum[config.environment].rpc));
-	}
-	if(!web3.isConnected()) {
-		var err = '{code: 500, title: "Error", message: "check RPC"}';
-		cb(err, web3, config);
-	} else {
-		//console.log(web3.eth.accounts);
-		
+	if (typeof web3 !== 'undefined') web3 = new Web3(web3.currentProvider);
+	else web3 = new Web3(new Web3.providers.HttpProvider(config.Ethereum[config.environment].rpc));
+
+	if (!web3) return finishScript(err);
+	
+	web3.eth.net.isListening().then(function(isListening) {
+		if (!isListening) {
+			var err = {code: 500, title: "Error", message: "check RPC"};
+			return finishScript(err);
+		}
+
 		web3.eth.defaultAccount = config.Ethereum[config.environment].account;
-		var defaultAccount = web3.eth.defaultAccount;
-		cb(null, web3, config, defaultAccount);
-	}
-}
-
-function attachToContract(cb) {
-	var config = getConfig();
-	configureWeb3(function(err, web3, config, defaultAccount) {
-		if (err) {
-			console.log(err);
-			return;
-		}
-
-		var contractABI = config.Ethereum.contracts.Oracles.abi;
-		var contractAddress = config.Ethereum[config.environment].contractAddress;
-
-		if(!web3.isConnected()) {
-			if (cb) {
-					cb({code: 200, title: "Error", message: "check RPC"}, null);
-				}
-		} else {
-			var MyContract = web3.eth.contract(contractABI);
-
-			contract = MyContract.at(contractAddress);
-			
-			if (cb) {
-				cb(null, contract, web3);
-			}
-		}
+		cb(web3, config, web3.eth.defaultAccount);
+	}, function(err) {
+		return finishScript(err);
 	});
 }
 
-function toUnifiedLengthLeft(strIn) {//for numbers
-  var strOut = "";
-  for (var i = 0; i < 64 - strIn.length; i++) {
-    strOut += "0"
-  }
-  strOut += strIn;
-  return strOut;
-}
+function addInitialKey(contract, web3, initialKey) {
+	addInitialKeyTX(web3, contract, initialKey, function(err, txHash) {
+		if (err) return finishScript(err);
 
-String.prototype.hexEncode = function(){
-    var hex, i;
-
-    var result = "";
-    for (i=0; i<this.length; i++) {
-        hex = this.charCodeAt(i).toString(16);
-        result += hex.slice(-4);
-    }
-
-    return result
-}
-
-
-function SHA3Encrypt(web3, str, cb) {
-  var strEncode = web3.sha3(str);
-  cb(strEncode, null);
-}
-
-function addInitialKeyTX(web3, contract, _addr, cb) {
-		if(!web3.isConnected()) {
-			cb({code: 500, title: "Error", message: "check RPC"}, null);
-		} else {
-			var func = "addInitialKey(address)";
-			SHA3Encrypt(web3, func, function(funcEncode) {
-				var funcEncodePart = funcEncode.substring(0,10);
-				var data = funcEncodePart
-			    + toUnifiedLengthLeft(_addr.substr(2));
-
-			    var gasWillUsed = web3.eth.estimateGas({from: web3.eth.defaultAccount, to: _addr, data: data});
-			    gasWillUsed += 31000;
-			    //console.log(gasWillUsed);
-
-			    console.log("new initial key: " + _addr);
-			    console.log("from: " +  web3.eth.defaultAccount);
-
-				contract.addInitialKey.sendTransaction(_addr, {gas: gasWillUsed, from: web3.eth.defaultAccount}, function(err, result) {
-					cb(err, result);
-				});
-			});
-		}
-}
-
-function sendEtherToInitialKeyTX(web3, _addr, cb) {
-	if(!web3.isConnected()) {
-		cb({code: 500, title: "Error", message: "check RPC"}, null);
-	} else {
-		var ethToSend = 100000000000000000;
-		var gasWillUsed = web3.eth.estimateGas({from: web3.eth.defaultAccount, to: _addr, value: ethToSend});
-		web3.eth.sendTransaction({gas: gasWillUsed, from: web3.eth.defaultAccount, to: _addr, value: ethToSend}, function(err, result) {
-			cb(err, result);
+		console.log("Wait tx " + txHash + " to add initial key to be mined...");
+		getTxCallBack(web3, txHash, function() {
+			console.log("Initial key " + initialKey + " is added to contract");
+			sendEtherToInitialKeyTX(web3, initialKey, finishScript);
 		});
+	});
+}
+
+function getTxCallBack(web3, txHash, cb) {
+	web3.eth.getTransaction(txHash, function(err, txDetails) {
+		if (err) return finishScript(err);
+
+  		if (!txDetails.blockNumber) {
+  			setTimeout(function() {
+				getTxCallBack(web3, txHash, cb);
+			}, 2000)
+  		} else {
+  			cb();
+  		}
+  	});
+};
+
+async function addInitialKeyTX(web3, contract, initialKey, cb) {
+	contract.methods.addInitialKey(initialKey).estimateGas()
+	.then(function(estimatedGas) {
+    	console.log("Estimated gas to add initial key:", estimatedGas)
+
+	    var opts = {from: web3.eth.defaultAccount, gasLimit: estimatedGas}
+		contract.methods.addInitialKey(initialKey)
+		.send(opts, function(err, txHash) {
+			cb(err, txHash);
+		});
+    })
+}
+
+function sendEtherToInitialKeyTX(web3, initialKey, cb) {
+	var BN = web3.utils.BN;
+	var ethToSend = web3.utils.toWei(new BN(100), "milliether");
+	console.log("WEI to send to initial key: " + ethToSend)
+
+	var opts = {from: web3.eth.defaultAccount, to: initialKey, value: ethToSend};
+	web3.eth.sendTransaction(opts, function(err, result) {
+		cb(err, web3, result);
+	});
+}
+
+function finishScript(err, web3, txHash) {
+	if (err) {
+		console.log("Something went wrong with generating initial key");
+		console.log(err.message);
+		return;
 	}
+
+	console.log("Wait tx to send Eth to initial key to be mined...");
+	getTxCallBack(web3, txHash, function() {
+		console.log("0.1 Eth sent to initial key");
+	});
 }
