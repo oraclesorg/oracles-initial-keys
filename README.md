@@ -17,11 +17,13 @@ Install [nodejs](https://nodejs.org/en/download/package-manager/)
 Expected result:
 
 ```
-Initial key generated to ./initialKeysDemo/489d0379c2cc40bffd48a9c99e5f65fd7ddb0ed5.json
-Password for initial key: goW2klc1
-0x489d0379c2cc40bffd48a9c99e5f65fd7ddb0ed5
-Wait tx to add initial key to be mined...
-Initial key 0x489d0379c2cc40bffd48a9c99e5f65fd7ddb0ed5 added to contract
+Initial key 0x87955e8a4c1887cbfcc79950620162eec89ac87b is generated to ./initialKeysDemo/87955e8a4c1887cbfcc79950620162eec89ac87b.json
+Password for initial key: zulujeziwivaxuximisu
+Estimated gas to add initial key: 50346
+Wait tx 0xbc2c717245950b4492884b1525a14968acfe73d426111d1ed8c30a64a0f7dfe4 to add initial key to be mined...
+Initial key 0x87955e8a4c1887cbfcc79950620162eec89ac87b is added to contract
+WEI to send to initial key: 100000000000000000
 Wait tx to send Eth to initial key to be mined...
-0.01 Eth sent to initial key
+0.1 Eth sent to initial key
+
 ```
